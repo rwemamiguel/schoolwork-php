@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Queue Visualizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        button {
+            margin: 5px;
+            padding: 8px 15px;
+        }
+        #queueDisplay {
+            margin-top: 15px;
+            padding: 10px;
+            border: 1px solid #333;
+            min-height: 30px;
+        }
+        #message {
+            margin-top: 10px;
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Queue Implementation (Browser)</h2>
+
+    <input type="number" id="enqueueValue" placeholder="Enter value">
+
+    <br><br>
+
+    <button onclick="enqueue()">Enqueue</button>
+    <button onclick="dequeue()">Dequeue</button>
+    <button onclick="peek()">Peek</button>
+
+    <div id="queueDisplay"></div>
+    <div id="message"></div>
+
+    <script src="queue.js"></script>
+</body>
+</html>
