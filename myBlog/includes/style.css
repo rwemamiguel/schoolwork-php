@@ -1,0 +1,11 @@
+body {
+    background-color: #f2f1f1;
+}
+form {
+    width: 420px;
+    background-color: white;
+    margin: 50px auto;
+    border-radius: 5px;
+    padding: 10px auto;
+    box-shadow: 0 4px 8px rgb(247,245,245);
+}
