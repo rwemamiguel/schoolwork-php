@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>Inventory</h2>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="products.html">Products</a>
+    <a href="suppliers.html">Suppliers</a>
+    <a href="stock.html">Stock IN/OUT</a>
+    <a href="transactions.html">Transaction Log</a>
+</div>
+
+<div class="main">
+    <h1>Admin Dashboard</h1>
+
+    <div class="cards">
+        <div class="card">
+            <h3>Total Products</h3>
+            <p id="totalProducts">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Total Suppliers</h3>
+            <p id="totalSuppliers">0</p>
+        </div>
+    </div>
+</div>
+
+<script>
+fetch("/api/products")
+.then(res => res.json())
+.then(data => {
+    document.getElementById("totalProducts").innerText = data.length;
+});
+
+fetch("/api/suppliers")
+.then(res => res.json())
+.then(data => {
+    document.getElementById("totalSuppliers").innerText = data.length;
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stock Management</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="sidebar">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="products.html">Products</a>
+    <a href="suppliers.html">Suppliers</a>
+    <a href="stock.html">Stock IN/OUT</a>
+    <a href="transactions.html">Transaction Log</a>
+</div>
+
+<div class="main">
+    <h2>Stock IN / OUT</h2>
+
+    <form id="stockForm">
+        <input type="number" placeholder="Product ID" id="pro_id" required>
+        <select id="type">
+            <option value="IN">Stock IN</option>
+            <option value="OUT">Stock OUT</option>
+        </select>
+        <input type="number" placeholder="Quantity" id="quantity" required>
+        <button type="submit">Submit</button>
+    </form>
+</div>
+
+<script>
+document.getElementById("stockForm").addEventListener("submit", function(e){
+    e.preventDefault();
+
+    fetch("/api/transactions/stock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            pro_id: document.getElementById("pro_id").value,
+            type: document.getElementById("type").value,
+            quantity: document.getElementById("quantity").value
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message);
+    });
+});
+</script>
+
+</body>
+</html>
