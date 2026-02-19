@@ -4,9 +4,8 @@ const cookieParser = require("cookie-parser");
 const { GoogleStrategy } = require('passport-google-oauth20'); 
 const router = express.Router();
 const passport = require("passport");
-require("../config/passport");
 const path = require("path");
-const JWT_SECRET = process.env.JWT_SECRET ||
+const JWT_SECRET = process.env.JWT_SECRET 
 
 router.get('/login',(req,res)=>{
     res.sendFile(path.join(__dirname,'../views/login.html'));
@@ -19,7 +18,7 @@ router.get('/auth/google',passport.authenticate('google',{scope:['profile','emai
 router.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:'/login.html'}),(req,res)=>{
     const token=jwt.sign(
         {id:req.user.id},
-        JWT_SECRET,
+        process.env.JWT_SECRET,
         {expiresIn:'1h'}
     );
     res.cookie('token',token,
@@ -40,23 +39,46 @@ router.get('/logout', (req, res, next) => {
                 return res.redirect('/dashboard');
             }
 
-            res.clearCookie('connect.sid'); // remove session cookie
+            res.clearCookie('connect.sid');
             res.redirect('/login');
         });
     });
 
 });
-const authenticationToken =(req,res,next)=>{
-    const token=req.cookies.token;
-    console.log("token",token);
-    if(!token) return res.redirect('/login.html');
-    next();
-      try {
-    jwt.verify(token, JWT_SECRET);
-    next();
-  } catch (err) {
-    return res.redirect("/login.html");
-  }
+
+router.post('/login',
+    passport.authenticate('local', { session: false }),
+    (req, res) => {
+
+        const payload = {
+            id: req.user.id,
+            username: req.user.username,
+            role: req.user.role
+        };
+
+const token = jwt.sign(
+    { id: req.user.id },
+    process.env.JWT_SECRET,
+    { expiresIn: '1h' }
+);
+
+
+        res.json({ token });
+    }
+);
+
+const authenticationToken = (req, res, next) => {
+    const token = req.cookies.token;
+    console.log("Received Token:", token);
+    if (!token) return res.redirect('/login');
+
+    try {
+        jwt.verify(token, process.env.JWT_SECRET);
+        next();
+    } catch (err) {
+        return res.redirect('/login');
+    }
 };
+
 
 module.exports = router;

@@ -17,9 +17,9 @@ passport.use(new LocalStrategy((username,password,done)=>{
   });
 }));
 
-passport.serializeUser((user,done)=>done(null,user.user_id));
+passport.serializeUser((user,done)=>done(null,user.id));
 passport.deserializeUser((id,done)=>{
-  db.query("SELECT * FROM users WHERE user_id=?",[id],(err,results)=>{
+  db.query("SELECT * FROM users WHERE id=?",[id],(err,results)=>{
     if(err) return done(err);
     done(null,results[0]);
   });
@@ -29,7 +29,7 @@ passport.deserializeUser((id,done)=>{
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "/auth/google/callback"
+    callbackURL: 'http://localhost:3000/auth/google/callback'
 },
 async (accessToken, refreshToken, profile, done) => {
 
@@ -54,7 +54,7 @@ async (accessToken, refreshToken, profile, done) => {
         db.query("INSERT INTO users SET ?", newUser, (err, result) => {
             if (err) return done(err);
 
-            newUser.user_id = result.insertId;
+            newUser.id = result.Id;
             return done(null, newUser);
         });
 
