@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,9 +5,11 @@
 <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+<a href="/logout" class="logout-btn">Logout</a>
+
 <div class="sidebar">
 <h2>Inventory</h2>
-<a href="/dashboard">Suppliers</a>
+<a href="/dashboard">Dashboard</a>
 <a href="/products">Products</a>
 <a href="/suppliers">Suppliers</a>
 <a href="/stock">Stock</a>
@@ -16,18 +17,28 @@
 
 <div class="main">
 <h1>Suppliers</h1>
-<div class="card-container">
-<div class="card"><h3>Total Products</h3><p>0</p></div>
-<div class="card"><h3>Total Suppliers</h3><p>0</p></div>
-<div class="card"><h3>Transactions</h3><p>0</p></div>
+
+<form method="POST" action="/suppliers/add">
+<div class="form-group">
+<input type="text" name="sup_name" placeholder="Supplier Name" required>
 </div>
+<div class="form-group">
+<input type="text" name="sup_phone" placeholder="Phone Number">
+</div>
+<div class="form-group">
+<input type="email" name="sup_email" placeholder="Email Address">
+</div>
+<button class="btn btn-primary" type="submit">Add Supplier</button>
+</form>
+
+<br><br>
 
 <table class="table">
 <thead>
-<tr><th>ID</th><th>Name</th><th>Quantity</th><th>Supplier</th></tr>
+<tr><th>ID</th><th>Name</th><th>Phone</th><th>Email</th></tr>
 </thead>
 <tbody>
-<tr><td>1</td><td>Sample Product</td><td>50</td><td>ABC Ltd</td></tr>
+{{SUPPLIER_ROWS}}
 </tbody>
 </table>
 </div>

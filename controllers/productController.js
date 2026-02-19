@@ -50,6 +50,7 @@ exports.list = (req, res) => {
         fs.readFile(filePath, 'utf8', (err, html) => {
             if (err) return res.send(err.message);
 
+            // Render current product rows into template.
             html = html.replace('{{TABLE_ROWS}}', tableRows);
             res.send(html);
         });

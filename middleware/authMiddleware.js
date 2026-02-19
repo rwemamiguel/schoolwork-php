@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const secretKey = process.env.JWT_SECRET 
+const secretKey = process.env.JWT_SECRET || "change_this_jwt_secret";
 
 exports.protect = (req, res, next) => {
 
@@ -21,5 +21,19 @@ exports.protect = (req, res, next) => {
         next();
     } catch (err) {
         return res.status(403).json({ message: "Invalid token" });
+    }
+};
+
+exports.protectPage = (req, res, next) => {
+    if (!req.session.user || !req.cookies.token) {
+        return res.redirect("/login");
+    }
+
+    try {
+        const decoded = jwt.verify(req.cookies.token, secretKey);
+        req.user = decoded;
+        next();
+    } catch (err) {
+        return res.redirect("/login");
     }
 };

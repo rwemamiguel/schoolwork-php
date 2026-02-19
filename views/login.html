@@ -8,7 +8,7 @@
 <body>
 <div class="login-container">
 <div class="login-card">
-<h2>Admin Login</h2>
+<h2>Login</h2>
 <form method="POST" action="/login">
 <div class="form-group">
 <input type="text" name="username" placeholder="Username" required>
@@ -21,6 +21,9 @@
 <a href="/auth/google/" class="google-btn">
     Login with Google
 </a>
+<p style="margin-top:12px;text-align:center">
+    New here? <a href="/register">Create an account</a>
+</p>
 
 </div>
 </div>
@@ -40,7 +43,8 @@
                 alert('Login failed');
             }
         } catch (error) {
-            alert('Login failed: ' + error.response.data.message);
+            const msg = error?.response?.data?.message || 'Invalid login credentials';
+            alert('Login failed: ' + msg);
         }
     });
 </script>

@@ -1,62 +1,67 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
-const cookieParser = require("cookie-parser");
-const { GoogleStrategy } = require('passport-google-oauth20'); 
-const router = express.Router();
 const passport = require("passport");
-require("../config/passport");
 const path = require("path");
-const JWT_SECRET = process.env.JWT_SECRET ||
+const { register, login, logout } = require("../controllers/authController");
+const { protectPage } = require("../middleware/authMiddleware");
 
-router.get('/login',(req,res)=>{
-    res.sendFile(path.join(__dirname,'../views/login.html'));
+const router = express.Router();
+const JWT_SECRET = process.env.JWT_SECRET || "change_this_jwt_secret";
+
+router.get("/login", (req, res) => {
+    res.sendFile(path.join(__dirname, "../views/login.html"));
 });
 
-router.get('/dashboard',(req,res)=>{
-    res.sendFile(path.join(__dirname,'../views/dashboard.html'));
+router.get("/register", (req, res) => {
+    res.sendFile(path.join(__dirname, "../views/register.html"));
 });
-router.get('/auth/google',passport.authenticate('google',{scope:['profile','email']}));
-router.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:'/login.html'}),(req,res)=>{
-    const token=jwt.sign(
-        {id:req.user.id},
-        JWT_SECRET,
-        {expiresIn:'1h'}
-    );
-    res.cookie('token',token,
-        {httpOnly:true,
-        maxAge:3600000
-    });
-    console.log("Google User:",req.user);
-    console.log("Generated Token:",token);
-    res.redirect('/dashboard');
+
+router.post("/register", register);
+router.post("/login", login);
+router.post("/logout", logout);
+
+router.get("/dashboard", protectPage, (req, res) => {
+    res.sendFile(path.join(__dirname, "../views/dashboard.html"));
 });
-router.get('/logout', (req, res, next) => {
 
-    req.logout(function(err) {
-        if (err) { return next(err); }
+router.get("/products", protectPage, (req, res) => {
+    res.redirect("/products/list");
+});
 
-        req.session.destroy((err) => {
-            if (err) {
-                return res.redirect('/dashboard');
-            }
+router.get("/stock", protectPage, (req, res) => {
+    res.sendFile(path.join(__dirname, "../views/stock.html"));
+});
 
-            res.clearCookie('connect.sid'); // remove session cookie
-            res.redirect('/login');
+router.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+
+router.get(
+    "/auth/google/callback",
+    passport.authenticate("google", { failureRedirect: "/login" }),
+    (req, res) => {
+        const userId = req.user.user_id || req.user.id;
+        const username = req.user.username || req.user.displayName || "user";
+        const token = jwt.sign({ id: userId, username }, JWT_SECRET, { expiresIn: "1h" });
+
+        req.session.user = { id: userId, username };
+        res.cookie("token", token, {
+            httpOnly: true,
+            sameSite: "strict",
+            maxAge: 3600000
+        });
+        res.redirect("/dashboard");
+    }
+);
+
+router.get("/logout", (req, res, next) => {
+    req.logout((err) => {
+        if (err) return next(err);
+
+        req.session.destroy(() => {
+            res.clearCookie("token");
+            res.clearCookie("connect.sid");
+            res.redirect("/login");
         });
     });
-
 });
-const authenticationToken =(req,res,next)=>{
-    const token=req.cookies.token;
-    console.log("token",token);
-    if(!token) return res.redirect('/login.html');
-    next();
-      try {
-    jwt.verify(token, JWT_SECRET);
-    next();
-  } catch (err) {
-    return res.redirect("/login.html");
-  }
-};
 
 module.exports = router;

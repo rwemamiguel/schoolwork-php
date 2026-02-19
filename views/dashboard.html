@@ -19,19 +19,50 @@
 <div class="main">
 <h1>Dashboard</h1>
 <div class="card-container">
-<div class="card"><h3>Total Products</h3><p>0</p></div>
-<div class="card"><h3>Total Suppliers</h3><p>0</p></div>
-<div class="card"><h3>Transactions</h3><p>0</p></div>
+<div class="card"><h3>Total Products</h3><p id="totalProducts">0</p></div>
+<div class="card"><h3>Total Suppliers</h3><p id="totalSuppliers">0</p></div>
+<div class="card"><h3>Low Stock Items</h3><p id="lowStockCount">0</p></div>
 </div>
 
 <table class="table">
 <thead>
 <tr><th>ID</th><th>Name</th><th>Quantity</th><th>Supplier</th></tr>
 </thead>
-<tbody>
-<tr><td>1</td><td>Sample Product</td><td>50</td><td>ABC Ltd</td></tr>
+<tbody id="lowStockBody">
 </tbody>
 </table>
 </div>
+
+<script>
+async function loadDashboard() {
+    try {
+        const res = await fetch('/api/dashboard');
+        if (!res.ok) {
+            window.location.href = '/login';
+            return;
+        }
+
+        const data = await res.json();
+        document.getElementById('totalProducts').innerText = data.totalProducts || 0;
+        document.getElementById('totalSuppliers').innerText = data.totalSuppliers || 0;
+        document.getElementById('lowStockCount').innerText = (data.lowStock || []).length;
+
+        const rows = (data.lowStock || []).map((item) => `
+            <tr>
+                <td>${item.pro_id}</td>
+                <td>${item.pro_name}</td>
+                <td>${item.quantity}</td>
+                <td>${item.sup_name || '-'}</td>
+            </tr>
+        `).join('');
+
+        document.getElementById('lowStockBody').innerHTML = rows || '<tr><td colspan="4">No low stock items</td></tr>';
+    } catch (err) {
+        window.location.href = '/login';
+    }
+}
+
+loadDashboard();
+</script>
 </body>
 </html>

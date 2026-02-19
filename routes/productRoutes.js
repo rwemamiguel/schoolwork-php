@@ -1,11 +1,9 @@
 const express = require('express');
-const db = require('../config/db');
 const router = express.Router();
 const productController = require('../controllers/productController');
+const { protectPage } = require('../middleware/authMiddleware');
 
-router.get('/', (req, res) => {
-    res.sendFile(require('path').join(__dirname, '../views/products.html'));
-});
+router.use(protectPage);
 
 // product operations
 router.get('/list', productController.list);
