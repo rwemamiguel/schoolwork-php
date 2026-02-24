@@ -4,7 +4,7 @@ const db = mysql.createConnection({
   host: process.env.DB_HOST || "127.0.0.1",
   user: process.env.DB_USER || "root",
   password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_NAME || "inventory_db",
+  database: process.env.DB_NAME || "inventory2_db",
   port: process.env.DB_PORT || 3306
 });
 db.connect(err=>{

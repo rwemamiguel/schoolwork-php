@@ -1,33 +1,41 @@
 const db = require('../config/db');
+const path = require('path');
 
-exports.stockIn = (req, res) => {
-    const { product_id, quantity } = req.body;
+exports.list = (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
 
-    db.query(
-        "UPDATE products SET quantity = quantity + ? WHERE pro_id=?",
-        [quantity, product_id]
-    );
+    db.query(`
+        SELECT t.*, p.pro_name
+        FROM transactions t
+        JOIN products p ON t.pro_id = p.pro_id
+        ORDER BY t.created_at DESC
+    `, (err, rows) => {
 
-    db.query(
-        "INSERT INTO transactions (pro_id, type, quantity) VALUES (?, 'IN', ?)",
-        [product_id, quantity]
-    );
+        let tableRows = '';
 
-    res.redirect('/products');
-};
+        rows.forEach(t => {
+            tableRows += `
+            <tr>
+                <td>${t.trans_id}</td>
+                <td>${t.pro_name}</td>
+                <td>${t.type}</td>
+                <td>${t.quantity}</td>
+                <td>${t.created_at}</td>
+            </tr>`;
+        });
 
-exports.stockOut = (req, res) => {
-    const { product_id, quantity } = req.body;
-
-    db.query(
-        "UPDATE products SET quantity = quantity - ? WHERE pro_id=?",
-        [quantity, product_id]
-    );
-
-    db.query(
-        "INSERT INTO transactions (pro_id, type, quantity) VALUES (?, 'OUT', ?)",
-        [product_id, quantity]
-    );
-
-    res.redirect('/products');
+        res.send(`
+            <h1>Stock Transactions</h1>
+            <table border="1">
+            <tr>
+                <th>ID</th>
+                <th>Product</th>
+                <th>Type</th>
+                <th>Qty</th>
+                <th>Date</th>
+            </tr>
+            ${tableRows}
+            </table>
+        `);
+    });
 };

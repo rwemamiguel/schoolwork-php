@@ -17,7 +17,7 @@
 </div>
 
 <div class="main">
-<h1>Dashboard</h1>
+<h1>Dashboard</h1><h1 id="dashboardTitle">Dashboard</h1>
 <div class="card-container">
 <div class="card"><h3>Total Products</h3><p id="totalProducts">0</p></div>
 <div class="card"><h3>Total Suppliers</h3><p id="totalSuppliers">0</p></div>
@@ -63,6 +63,15 @@ async function loadDashboard() {
 }
 
 loadDashboard();
+fetch('/api/user')
+  .then(res => res.json())
+  .then(user => {
+      const title = user.role === "admin"
+        ? "Admin Dashboard"
+        : `${user.username}'s Dashboard`;
+
+      document.getElementById("dashboardTitle").innerText = title;
+  });
 </script>
 </body>
 </html>

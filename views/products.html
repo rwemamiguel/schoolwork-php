@@ -49,6 +49,7 @@
 <th>Supplier</th>
 <th>Actions</th>
 </tr>
+
 </thead>
 <tbody>
 {{TABLE_ROWS}}
@@ -56,5 +57,30 @@
 </table>
 
 </div>
+<script>
+async function updateStock(id) {
+    const qty = document.getElementById(`qty-${id}`).value;
+    const type = document.getElementById(`type-${id}`).value;
+
+    if (!qty) {
+        alert("Enter quantity");
+        return;
+    }
+
+    const res = await fetch('/products/stock', {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ id, qty, type })
+    });
+
+    if (res.ok) {
+        location.reload();
+    } else {
+        alert("Stock update failed");
+    }
+}
+</script>
 </body>
 </html>
