@@ -47,38 +47,52 @@ const db = require('../config/db');
 const path = require('path');
 const fs = require('fs');
 
-exports.list = (req, res) => {
-    if (!req.session.user) return res.redirect('/login');
-
-    db.query("SELECT * FROM suppliers", (err, rows) => {
-
-        let tableRows = '';
-
-        rows.forEach(s => {
-            tableRows += `
-            <tr>
-                <td>${s.sup_id}</td>
-                <td>${s.sup_name}</td>
-                <td>${s.sup_phone || '-'}</td>
-                <td>${s.sup_email || '-'}</td>
-            </tr>`;
-        });
-
-        const filePath = path.join(__dirname, '../views/suppliers.html');
-
-        fs.readFile(filePath, 'utf8', (err, html) => {
-            html = html.replace('{{SUPPLIER_ROWS}}', tableRows);
-            res.send(html);
-        });
+/*
+====================
+GET ALL SUPPLIERS
+====================
+*/
+exports.getAll = (req, res) => {
+    db.query("SELECT * FROM suppliers ORDER BY sup_id DESC", (err, results) => {
+        if (err) return res.status(500).json({ message: err.message });
+        res.json(results);
     });
 };
 
-exports.add = (req, res) => {
-    const { sup_name, sup_phone, sup_email } = req.body;
+
+/*
+====================
+CREATE SUPPLIER
+====================
+*/
+exports.create = (req, res) => {
+    const { sup_name, phone } = req.body;
+
+    if (!sup_name || !phone) {
+        return res.status(400).json({ message: "All fields required" });
+    }
 
     db.query(
-        "INSERT INTO suppliers (sup_name, sup_phone, sup_email) VALUES (?, ?, ?)",
-        [sup_name, sup_phone || null, sup_email || null],
-        () => res.redirect('/suppliers')
+        "INSERT INTO suppliers (sup_name, phone) VALUES (?, ?)",
+        [sup_name, phone],
+        (err) => {
+            if (err) return res.status(500).json({ message: err.message });
+            res.json({ message: "Supplier created successfully" });
+        }
     );
+};
+
+
+/*
+====================
+DELETE SUPPLIER
+====================
+*/
+exports.delete = (req, res) => {
+    const id = req.params.id;
+
+    db.query("DELETE FROM suppliers WHERE sup_id = ?", [id], (err) => {
+        if (err) return res.status(500).json({ message: err.message });
+        res.json({ message: "Supplier deleted successfully" });
+    });
 };

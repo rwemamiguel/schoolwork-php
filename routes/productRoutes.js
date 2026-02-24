@@ -24,7 +24,7 @@ const express = require("express");
 const router = express.Router();
 const { protectPage, checkRole } = require("../middleware/authMiddleware");
 const controller = require("../controllers/productController");
-
+console.log(controller);
 router.get("/", protectPage, (req, res) => {
     res.sendFile("products.html", { root: "views" });
 });

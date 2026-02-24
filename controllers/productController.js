@@ -134,78 +134,66 @@ const db = require('../config/db');
 const path = require('path');
 const fs = require('fs');
 
-exports.list = (req, res) => {
-    if (!req.session.user) return res.redirect('/login');
-
-    db.query(`
+/*
+========================
+GET ALL PRODUCTS (API)
+========================
+*/
+exports.getAll = (req, res) => {
+    const sql = `
         SELECT p.*, s.sup_name
         FROM products p
         LEFT JOIN suppliers s ON p.sup_id = s.sup_id
-    `, (err, rows) => {
+        ORDER BY p.pro_id DESC
+    `;
 
-        let tableRows = '';
-
-        rows.forEach(p => {
-            tableRows += `
-            <tr>
-                <td>${p.pro_id}</td>
-                <td>${p.pro_name}</td>
-                <td>${p.quantity}</td>
-                <td>${p.sup_name || '-'}</td>
-                <td>
-                    <input type="number" id="qty-${p.pro_id}" placeholder="Qty" style="width:70px">
-                    <select id="type-${p.pro_id}">
-                        <option value="IN">IN</option>
-                        <option value="OUT">OUT</option>
-                    </select>
-                    <button class="btn btn-primary"
-                        onclick="updateStock(${p.pro_id})">
-                        Update
-                    </button>
-                    <a href="/products/delete/${p.pro_id}" class="btn btn-danger">Delete</a>
-                </td>
-            </tr>`;
-        });
-
-        const filePath = path.join(__dirname, '../views/products.html');
-
-        fs.readFile(filePath, 'utf8', (err, html) => {
-            html = html.replace('{{TABLE_ROWS}}', tableRows);
-            res.send(html);
-        });
+    db.query(sql, (err, results) => {
+        if (err) return res.status(500).json({ message: err.message });
+        res.json(results);
     });
 };
 
-exports.add = (req, res) => {
+
+/*
+========================
+CREATE PRODUCT
+========================
+*/
+exports.create = (req, res) => {
     const { pro_name, quantity, sup_id } = req.body;
 
-    db.query(
-        "INSERT INTO products (pro_name, quantity, sup_id) VALUES (?, ?, ?)",
-        [pro_name, quantity, sup_id],
-        () => res.redirect('/products')
-    );
-};
+    if (!pro_name || !quantity || !sup_id) {
+        return res.status(400).json({ message: "All fields required" });
+    }
 
-exports.stock = (req, res) => {
-    const { id, qty, type } = req.body;
+    const sql = `
+        INSERT INTO products (pro_name, quantity, sup_id)
+        VALUES (?, ?, ?)
+    `;
 
-    const sql = type === "IN"
-        ? "UPDATE products SET quantity = quantity + ? WHERE pro_id = ?"
-        : "UPDATE products SET quantity = quantity - ? WHERE pro_id = ?";
+    db.query(sql, [pro_name, quantity, sup_id], (err) => {
+        if (err) return res.status(500).json({ message: err.message });
 
-    db.query(sql, [qty, id], () => {
-
-        db.query(
-            "INSERT INTO transactions (pro_id, type, quantity) VALUES (?, ?, ?)",
-            [id, type, qty]
-        );
-
-        res.json({ message: "Updated" });
+        res.json({ message: "Product created successfully" });
     });
 };
 
+
+/*
+========================
+DELETE PRODUCT
+========================
+*/
 exports.delete = (req, res) => {
-    db.query("DELETE FROM products WHERE pro_id = ?", [req.params.id], () => {
-        res.redirect('/products');
-    });
+    const id = req.params.id;
+
+    db.query(
+        "DELETE FROM products WHERE pro_id = ?",
+        [id],
+        (err) => {
+            if (err) return res.status(500).json({ message: err.message });
+
+            res.json({ message: "Product deleted successfully" });
+        }
+    );
 };
